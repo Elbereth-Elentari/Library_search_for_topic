@@ -118,5 +118,6 @@ interesting_books = [{
 
 reading_list = pd.DataFrame(columns=['title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
 
+reading_list.drop_duplicates(inplace=True)
 reading_list.sort_values(by='year', ascending=False, inplace=True)
 reading_list[:max(200, max_books)].to_excel(f'..\..\\Books\\Reading_lists\\{term}_reading_list.xlsx', index=False)
