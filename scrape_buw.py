@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException
 from selenium.webdriver.support.ui import Select
+from selenium .webdriver import ChromeOptions
 import pandas as pd
 import re
 
@@ -11,7 +12,13 @@ min_length = 100
 max_length = 700
 max_books = int(input('How many books do you want? '))
 
-driver = webdriver.Chrome()
+
+options = ChromeOptions()
+options.add_argument('--headless')
+prefs = {"profile.managed_default_content_settings.images": 2}
+options.add_experimental_option("prefs", prefs)
+
+driver = webdriver.Chrome('../install/chromedriver', options=options)
 driver.get(f'https://chamo.buw.uw.edu.pl/heading/search?match_1=MUST&field_1=heading&term_1={term}&facet_heading_type=subject&sort=heading')
 
 def next_or_break(driver):
@@ -120,4 +127,4 @@ reading_list = pd.DataFrame(columns=['title','author', 'WD_signature', 'storage'
 
 reading_list.drop_duplicates(inplace=True)
 reading_list.sort_values(by='year', ascending=False, inplace=True)
-reading_list[:max(200, max_books)].to_excel(f'..\..\\Books\\Reading_lists\\{term}_reading_list.xlsx', index=False)
+reading_list[:max(len(reading_list), max_books)].to_csv(f'/home/arvala/Documents/Books/Reading_lists/{term}_reading_list.tsv', index=False, sep='\t')
