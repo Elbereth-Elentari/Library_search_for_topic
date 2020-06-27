@@ -127,4 +127,13 @@ reading_list = pd.DataFrame(columns=['title','author', 'WD_signature', 'storage'
 
 reading_list.drop_duplicates(inplace=True)
 reading_list.sort_values(by='year', ascending=False, inplace=True)
-reading_list[:max(len(reading_list), max_books)].to_csv(f'/home/arvala/Documents/Books/Reading_lists/{term}_reading_list.tsv', index=False, sep='\t')
+reading_list.drop_duplicates('title', inplace=True)
+
+for title in reading_list.title.unique():
+    df = reading_list[reading_list['title'] == title]
+    if len(df) > 1:
+        max_len_for_title = max(df['pages'])
+        reading_list.drop(reading_list[(reading_list['title'] == title) & (reading_list['pages'] < max_len_for_title)].index, inplace=True)
+
+output_file = f'/home/arvala/Documents/Books/Reading_lists/{term}_reading_list.tsv'
+reading_list[:min(len(reading_list), max_books)].to_csv(output_file, index=False, sep='\t')
