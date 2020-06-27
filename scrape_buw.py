@@ -5,21 +5,16 @@ from selenium .webdriver import ChromeOptions
 import pandas as pd
 import re
 
-term = input('What would you like to read about? ')
-term = term.replace(' ', '+')
-min_year = int(input('What is the oldest book you are interested in? '))
-min_length = 100
-max_length = 700
-max_books = int(input('How many books do you want? '))
 
+def get_conditions():
+    term = input('What would you like to read about? ')
+    term = term.replace(' ', '+')
+    min_year = int(input('What is the oldest book you are interested in? '))
+    min_length = 100
+    max_length = 700
+    max_books = int(input('How many books do you want? '))
+    return term, min_year, min_length, max_length, max_books
 
-options = ChromeOptions()
-options.add_argument('--headless')
-prefs = {"profile.managed_default_content_settings.images": 2}
-options.add_experimental_option("prefs", prefs)
-
-driver = webdriver.Chrome('../install/chromedriver', options=options)
-driver.get(f'https://chamo.buw.uw.edu.pl/heading/search?match_1=MUST&field_1=heading&term_1={term}&facet_heading_type=subject&sort=heading')
 
 def next_or_break(driver):
     try:
@@ -30,19 +25,11 @@ def next_or_break(driver):
         return 'no next'
 
 
-links = set()
-while True:
-    tags_from_page = driver.find_element_by_tag_name('tbody').find_elements_by_tag_name('a')
-    for tag in tags_from_page:
-        try:
-            links.add(tag.get_attribute('href'))
-        except StaleElementReferenceException:
-            pass
-    if next_or_break(driver) == 'no next': break
-
-
 class Book:
     interesting_books = set()
+    all_authors = set()
+    authors_to_scrape = set()
+
     def __init__(self):
         self.title = ''
         self.author = ''
@@ -51,41 +38,48 @@ class Book:
         self.pages = 0
         self.WD_signature = ''
         self.storage = ''
-    def check_quality(self):
+
+    def get_book_attributes(self, record):
+        title = record.find_element_by_class_name('title').text
+        self.title = re.sub(r' / .+', '', title)
+
+        try:
+            self.author = record.find_element_by_class_name('author').text
+        except NoSuchElementException:
+            pass
+
+        if 'BUW Magazyn' in record.text:
+            self.storage = 'magazyn'
+
+        infos = record.find_elements_by_tag_name('tr')
+        for info in infos:
+            if 'Klasyfikacja WD' in info.text:
+                self.WD_signature = info.find_element_by_tag_name('a').text
+            elif 'Adres wyd.' in info.text:
+                publisher_candidates = info.find_elements_by_tag_name('span')
+                for publisher in publisher_candidates:
+                    if publisher.get_attribute('class') != 'highlight':
+                        publisher_with_colon = re.search(r'.+ : ?(.+),.*(\d{4})', publisher.text)
+                        if publisher_with_colon:
+                            publisher = publisher_with_colon
+                        else:
+                            publisher = re.search(r'.+? (.+),.*(\d{4})', publisher.text)
+                        self.publisher = publisher.group(1)
+                        self.year = int(publisher.group(2))
+            elif 'Opis fiz.' in info.text:
+                pages = info.find_element_by_tag_name('span').text
+                pages = re.sub(r'\[.+?\]', '', pages)
+                self.pages = int(re.search(r'\d+', pages).group(0))
+
+    def check_quality(self, record):
         if self.year >= min_year and self.pages >= min_length and self.pages <= max_length:
             Book.interesting_books.add(self)
+            if len(self.author) > 0 and self.author in Book.all_authors:
+                author = record.find_element_by_class_name('author')
+                Book.authors_to_scrape.add(author.get_attribute('href'))
+            elif len(self.author) > 0:
+                Book.all_authors.add(self.author)
 
-
-def get_book_attributes(book, record):
-    title = record.find_element_by_class_name('title').text
-    book.title = re.sub(r' / .+', '', title)
-
-    try:
-        book.author = record.find_element_by_class_name('author').text
-    except NoSuchElementException:
-        pass
-
-    if 'BUW Magazyn' in record.text:
-        book.storage = 'magazyn'
-
-    infos = record.find_elements_by_tag_name('tr')
-    for info in infos:
-        if 'Klasyfikacja WD' in info.text:
-            book.WD_signature = info.find_element_by_tag_name('a').text
-        elif 'Adres wyd.' in info.text:
-            publisher = info.find_element_by_tag_name('span').text
-            publisher_with_colon = re.search(r'.+ : ?(.+),.*(\d{4})', publisher)
-            if publisher_with_colon:
-                publisher = publisher_with_colon
-            else:
-                publisher = re.search(r'.+? (.+),.*(\d{4})', publisher)
-            book.publisher = publisher.group(1)
-            book.year = int(publisher.group(2))
-        elif 'Opis fiz.' in info.text:
-            pages = info.find_element_by_tag_name('span').text
-            pages = re.sub(r'\[.+?\]', '', pages)
-            book.pages = int(re.search(r'\d+', pages).group(0))
-    return book
 
 
 def get_books(driver):
@@ -95,45 +89,72 @@ def get_books(driver):
 
         if ('BUW Wolny Dostęp' in record.text or 'BUW Magazyn' in record.text) and 'Adres wyd.' in record.text and 'Opis fiz.' in record.text:
             book = Book()
-            book = get_book_attributes(book, record)
-            book.check_quality()
+            book.get_book_attributes(record)
+            book.check_quality(record)
             if book.year < min_year and book.year > 0:
                 too_old = 'too old'
                 break
     return too_old
 
 
-for link_to_tag in links:
-    driver.get(link_to_tag)
-    select = Select(driver.find_element_by_id('search_sort'))
-    select.select_by_value('5')
-    too_old = get_books(driver)
-    while too_old == 'not too old':
+def create_link_set(driver):
+    links = set()
+    while True:
+        tags_from_page = driver.find_element_by_tag_name('tbody').find_elements_by_tag_name('a')
+        for tag in tags_from_page:
+            try:
+                links.add(tag.get_attribute('href'))
+            except StaleElementReferenceException:
+                pass
         if next_or_break(driver) == 'no next': break
+    return links
+
+
+def get_books_from_links(link_set):
+    for link in link_set:
+        driver.get(link)
+        select = Select(driver.find_element_by_id('search_sort'))
+        select.select_by_value('5')
         too_old = get_books(driver)
+        while too_old == 'not too old':
+            if next_or_break(driver) == 'no next': break
+            too_old = get_books(driver)
+    return True
 
-driver.close()
 
-interesting_books = [{
-'title':book.title,
-'author':book.author,
-'publisher':book.publisher,
-'year':book.year,
-'pages':book.pages,
-'WD_signature':book.WD_signature,
-'storage':book.storage} for book in Book.interesting_books]
+def deduplicate_books(df):
+    df.drop_duplicates(inplace=True)
+    df.sort_values(by='year', ascending=False, inplace=True)
+    df.drop_duplicates('title', inplace=True)
 
-reading_list = pd.DataFrame(columns=['title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
+    for title in df.title.unique():
+        df_title = df[df['title'] == title]
+        if len(df_title) > 1:
+            max_len_for_title = max(df_title['pages'])
+            df.drop(df[(df['title'] == title) & (df['pages'] < max_len_for_title)].index, inplace=True)
+    return df
 
-reading_list.drop_duplicates(inplace=True)
-reading_list.sort_values(by='year', ascending=False, inplace=True)
-reading_list.drop_duplicates('title', inplace=True)
 
-for title in reading_list.title.unique():
-    df = reading_list[reading_list['title'] == title]
-    if len(df) > 1:
-        max_len_for_title = max(df['pages'])
-        reading_list.drop(reading_list[(reading_list['title'] == title) & (reading_list['pages'] < max_len_for_title)].index, inplace=True)
+if __name__ == '__main__':
+    term, min_year, min_length, max_length, max_books = get_conditions()
 
-output_file = f'/home/arvala/Documents/Books/Reading_lists/{term}_reading_list.tsv'
-reading_list[:min(len(reading_list), max_books)].to_csv(output_file, index=False, sep='\t')
+    options = ChromeOptions()
+    #options.add_argument('--headless')
+    prefs = {"profile.managed_default_content_settings.images": 2}
+    options.add_experimental_option("prefs", prefs)
+
+    driver = webdriver.Chrome('../install/chromedriver', options=options)
+    driver.get(f'https://chamo.buw.uw.edu.pl/heading/search?match_1=MUST&field_1=heading&term_1={term}&facet_heading_type=subject&sort=heading')
+
+    links = create_link_set(driver)
+    get_books_from_links(links)
+    get_books_from_links(Book.authors_to_scrape)
+    driver.close()
+
+    interesting_books = [{'title':book.title, 'author':book.author, 'publisher':book.publisher, 'year':book.year, 'pages':book.pages, 'WD_signature':book.WD_signature, 'storage':book.storage} for book in Book.interesting_books]
+
+    reading_list = pd.DataFrame(columns=['title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
+    reading_list = deduplicate_books(reading_list)
+
+    output_file = f'/home/arvala/Documents/Books/Reading_lists/{term}_reading_list.tsv'
+    reading_list[:min(len(reading_list), max_books)].to_csv(output_file, index=False, sep='\t')
