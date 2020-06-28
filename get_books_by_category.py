@@ -58,11 +58,11 @@ class Book:
                 publisher_candidates = info.find_elements_by_tag_name('span')
                 for publisher in publisher_candidates:
                     if publisher.get_attribute('class') != 'highlight':
-                        publisher_with_colon = re.search(r'.+ : ?(.+),.*(\d{4})', publisher.text)
+                        publisher_with_colon = re.search(r'.+ : ?(.+),?.*(\d{4})', publisher.text)
                         if publisher_with_colon:
                             publisher = publisher_with_colon
                         else:
-                            publisher = re.search(r'.+? (.+),.*(\d{4})', publisher.text)
+                            publisher = re.search(r'.+? (.+),?.*(\d{4})', publisher.text)
                         self.publisher = publisher.group(1)
                         self.year = int(publisher.group(2))
             elif 'Opis fiz.' in info.text:
@@ -125,14 +125,7 @@ def deduplicate_books(df):
     df.drop_duplicates(inplace=True)
     df.sort_values(by='year', ascending=False, inplace=True)
     df.drop_duplicates(subset='title', inplace=True)
-
-    for title in df.title.unique():
-        df_title = df[df['title'] == title]
-        if len(df_title) > 1:
-            max_len_for_title = max(df_title['pages'])
-            df.drop(df[(df['title'] == title) & (df['pages'] < max_len_for_title)].index, inplace=True)
     return df
-
 
 if __name__ == '__main__':
     term, min_year, min_length, max_length, max_books = get_conditions()

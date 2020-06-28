@@ -37,12 +37,12 @@ class Book:
             if 'Klasyfikacja WD' in info.text:
                 self.WD_signature = info.find('a').text
             elif 'Adres wyd.' in info.text:
-                publisher = info.find('span', attrs={'dir':'ltr'})
-                publisher_with_colon = re.search(r'.+ : ?(.+),.*(\d{4})', publisher.text)
+                publisher = info.find('span')
+                publisher_with_colon = re.search(r'.+ : ?(.+),?.*(\d{4})', publisher.text)
                 if publisher_with_colon:
                     publisher = publisher_with_colon
                 else:
-                    publisher = re.search(r'.+? (.+),.*(\d{4})', publisher.text)
+                    publisher = re.search(r'.+? (.+),?.*(\d{4})', publisher.text)
                 self.publisher = publisher.group(1)
                 self.year = int(publisher.group(2))
             elif 'Opis fiz.' in info.text:
@@ -73,7 +73,7 @@ def get_books(driver):
     all = re.search(r' z (\d+)', all).group(1)
     all = int(all)
     print('Scrapeable catalogue size', all)
-    record_counter = 0
+    record_counter = 155360
     while record_counter < all:
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, 'html.parser')
@@ -86,7 +86,7 @@ def get_books(driver):
             if record_counter % 100 == 0:
                 print('Scraping progress:', record_counter/all)
 
-            if len(Book.interesting_books) % 1000 == 0:
+            if len(Book.interesting_books) % 1000 == 0 and len(Book.interesting_books) > 0:
                 save_batch(record_counter)
 
             record_counter += 1
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     options.add_experimental_option("prefs", prefs)
 
     driver = webdriver.Chrome('../install/chromedriver', options=options)
-    driver.get('https://chamo.buw.uw.edu.pl/search/query?filter_date=1.201.2018&filter_date=1.201.2017&filter_date=1.202.2020&filter_date=1.201.2019&filter_date=1.201.2014&filter_date=1.201.2013&filter_date=1.201.2016&filter_date=1.202.2021&filter_date=1.201.2015&filter_date=1.200.2009&filter_date=1.201.2010&filter_date=1.201.2012&filter_date=1.201.2011&filter_date=1.200.2001&filter_date=1.200.2002&filter_date=1.200.2003&filter_date=1.200.2004&filter_date=1.200.2005&filter_date=1.200.2006&filter_date=1.200.2007&filter_date=1.200.2008&filter_date=1.200.2000&filter_format=book&filter_lang=pol&filter_lang=eng&filter_loc=10000&filter_loc=10002&sort=dateNewest&theme=system')
+    driver.get('https://chamo.buw.uw.edu.pl/search/query?filter_date=1.201.2018&filter_date=1.201.2017&filter_date=1.202.2020&filter_date=1.201.2019&filter_date=1.201.2014&filter_date=1.201.2013&filter_date=1.201.2016&filter_date=1.202.2021&filter_date=1.201.2015&filter_date=1.200.2009&filter_date=1.201.2010&filter_date=1.201.2012&filter_date=1.201.2011&filter_date=1.200.2001&filter_date=1.200.2002&filter_date=1.200.2003&filter_date=1.200.2004&filter_date=1.200.2005&filter_date=1.200.2006&filter_date=1.200.2007&filter_date=1.200.2008&filter_date=1.200.2000&filter_format=book&filter_lang=pol&filter_lang=eng&filter_loc=10000&filter_loc=10002&sort=dateNewest&pageNumber=15535&theme=system')
 
     get_books(driver)
     driver.close()
