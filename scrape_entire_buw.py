@@ -73,7 +73,7 @@ def get_books(driver):
     all = re.search(r' z (\d+)', all).group(1)
     all = int(all)
     print('Scrapeable catalogue size', all)
-    record_counter = 155360
+    record_counter = 320831
     while record_counter < all:
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, 'html.parser')
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     options.add_experimental_option("prefs", prefs)
 
     driver = webdriver.Chrome('../install/chromedriver', options=options)
-    driver.get('https://chamo.buw.uw.edu.pl/search/query?filter_date=1.201.2018&filter_date=1.201.2017&filter_date=1.202.2020&filter_date=1.201.2019&filter_date=1.201.2014&filter_date=1.201.2013&filter_date=1.201.2016&filter_date=1.202.2021&filter_date=1.201.2015&filter_date=1.200.2009&filter_date=1.201.2010&filter_date=1.201.2012&filter_date=1.201.2011&filter_date=1.200.2001&filter_date=1.200.2002&filter_date=1.200.2003&filter_date=1.200.2004&filter_date=1.200.2005&filter_date=1.200.2006&filter_date=1.200.2007&filter_date=1.200.2008&filter_date=1.200.2000&filter_format=book&filter_lang=pol&filter_lang=eng&filter_loc=10000&filter_loc=10002&sort=dateNewest&pageNumber=15535&theme=system')
+    driver.get('https://chamo.buw.uw.edu.pl/search/query?filter_date=1.201.2018&filter_date=1.201.2017&filter_date=1.202.2020&filter_date=1.201.2019&filter_date=1.201.2014&filter_date=1.201.2013&filter_date=1.201.2016&filter_date=1.202.2021&filter_date=1.201.2015&filter_date=1.200.2009&filter_date=1.201.2010&filter_date=1.201.2012&filter_date=1.201.2011&filter_date=1.200.2001&filter_date=1.200.2002&filter_date=1.200.2003&filter_date=1.200.2004&filter_date=1.200.2005&filter_date=1.200.2006&filter_date=1.200.2007&filter_date=1.200.2008&filter_date=1.200.2000&filter_format=book&filter_lang=pol&filter_lang=eng&filter_loc=10000&filter_loc=10002&sort=dateNewest&pageNumber=32083&theme=system')
 
     get_books(driver)
     driver.close()
