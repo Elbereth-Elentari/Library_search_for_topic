@@ -1,5 +1,4 @@
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException
 from selenium.webdriver.support.ui import Select
 from selenium .webdriver import ChromeOptions
 import pandas as pd
@@ -21,7 +20,7 @@ def next_or_break(driver):
         next_button = driver.find_element_by_link_text('Następne>')
         next_button.click()
         return True
-    except (NoSuchElementException, ElementNotInteractableException):
+    except:
         return 'no next'
 
 
@@ -45,7 +44,7 @@ class Book:
 
         try:
             self.author = record.find_element_by_class_name('author').text
-        except NoSuchElementException:
+        except:
             pass
 
         if 'BUW Magazyn' in record.text:
@@ -104,7 +103,7 @@ def create_link_set(driver):
         for tag in tags_from_page:
             try:
                 links.add(tag.get_attribute('href'))
-            except StaleElementReferenceException:
+            except:
                 pass
         if next_or_break(driver) == 'no next': break
     return links
@@ -125,7 +124,7 @@ def get_books_from_links(link_set):
 def deduplicate_books(df):
     df.drop_duplicates(inplace=True)
     df.sort_values(by='year', ascending=False, inplace=True)
-    df.drop_duplicates('title', inplace=True)
+    df.drop_duplicates(subset='title', inplace=True)
 
     for title in df.title.unique():
         df_title = df[df['title'] == title]
