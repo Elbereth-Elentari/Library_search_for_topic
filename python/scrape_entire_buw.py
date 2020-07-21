@@ -61,7 +61,7 @@ def save_batch(counter):
     reading_list = pd.DataFrame(columns=['title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
 
     reading_list = deduplicate_books(reading_list)
-    reading_list.to_csv('BUW_catalogue_{}.tsv'.format(counter), index=False, sep='\t')
+    reading_list.to_csv('../data/BUW_catalogue_{}.tsv'.format(counter), index=False, sep='\t')
     Book.interesting_books.clear()
     return True
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
 
-    driver = webdriver.Chrome('../install/chromedriver', options=options)
+    driver = webdriver.Chrome('../../install/chromedriver', options=options)
     driver.get('https://chamo.buw.uw.edu.pl/search/query?filter_date=1.201.2018&filter_date=1.201.2017&filter_date=1.202.2020&filter_date=1.201.2019&filter_date=1.201.2014&filter_date=1.201.2013&filter_date=1.201.2016&filter_date=1.202.2021&filter_date=1.201.2015&filter_date=1.200.2009&filter_date=1.201.2010&filter_date=1.201.2012&filter_date=1.201.2011&filter_date=1.200.2001&filter_date=1.200.2002&filter_date=1.200.2003&filter_date=1.200.2004&filter_date=1.200.2005&filter_date=1.200.2006&filter_date=1.200.2007&filter_date=1.200.2008&filter_date=1.200.2000&filter_format=book&filter_lang=pol&filter_lang=eng&filter_loc=10000&filter_loc=10002&sort=dateNewest&pageNumber=32083&theme=system')
 
     get_books(driver)

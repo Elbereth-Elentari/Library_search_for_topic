@@ -3,9 +3,9 @@ import spacy
 from preprocessing import preprocess
 
 
-prep = pd.read_csv('Preprocessed_catalogue.tsv', sep='\t')
+prep = pd.read_csv('../data/Preprocessed_catalogue.tsv', sep='\t')
 term = 'object-oriented'
-tag = preprocess(f'{term}_reading_list.tsv')
+tag = preprocess(f'../results/{term}_reading_list.tsv')
 tag_en = tag[tag['language'] == 'en']
 tag_en['tokens'] = tag_en['tokens'].apply(lambda x: x+[term])
 

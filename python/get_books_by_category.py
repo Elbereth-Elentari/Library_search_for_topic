@@ -135,7 +135,7 @@ if __name__ == '__main__':
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
 
-    driver = webdriver.Chrome('../install/chromedriver', options=options)
+    driver = webdriver.Chrome('../../install/chromedriver', options=options)
     driver.get(f'https://chamo.buw.uw.edu.pl/heading/search?match_1=MUST&field_1=heading&term_1={term}&facet_heading_type=subject&sort=heading')
 
     links = create_link_set(driver)
@@ -148,5 +148,5 @@ if __name__ == '__main__':
     reading_list = pd.DataFrame(columns=['title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
     reading_list = deduplicate_books(reading_list)
 
-    output_file = f'/home/arvala/Documents/Books/Reading_lists/{term}_reading_list.tsv'
+    output_file = f'../results/{term}_reading_list.tsv'
     reading_list[:min(len(reading_list), max_books)].to_csv(output_file, index=False, sep='\t')

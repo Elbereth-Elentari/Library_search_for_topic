@@ -29,9 +29,10 @@ def detect_language(df):
 
 if __name__ == '__main__':
     cat = pd.DataFrame()
-    for file in os.listdir('./'):
+    data_path = '../data/'
+    for file in os.listdir(data_path):
         if file.endswith('.tsv'):
-            c = pd.read_csv(file, sep='\t')
+            c = pd.read_csv(data_path + file, sep='\t')
             cat = cat.append(c, ignore_index=True)
 
     cat = deduplicate_books(cat)
@@ -43,4 +44,4 @@ if __name__ == '__main__':
         for row in cat[cat.index.isin(sample)].itertuples():
             print(row.title)
 
-    cat.to_csv('Library_catalogue.tsv', sep='\t', index=False)
+    cat.to_csv('../data/Library_catalogue.tsv', sep='\t', index=False)

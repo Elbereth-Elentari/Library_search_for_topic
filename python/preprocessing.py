@@ -39,5 +39,5 @@ def preprocess(file):
 
 
 if __name__ == '__main__':
-    preprocessed_cat = preprocess('Library_catalogue.tsv')
-    preprocessed_cat.to_csv(f'Preprocessed_catalogue.tsv', index=False, sep='\t')
+    preprocessed_cat = preprocess('../data/Library_catalogue.tsv')
+    preprocessed_cat.to_csv(f'../data/Preprocessed_catalogue.tsv', index=False, sep='\t')
