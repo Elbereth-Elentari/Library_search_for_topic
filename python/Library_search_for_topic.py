@@ -19,7 +19,7 @@ from selenium.webdriver.support.ui import Select
 from selenium .webdriver import ChromeOptions
 
 from ipykernel import kernelapp as app
-from tqdm.auto import tqdm
+from tqdm.notebook import tqdm
 
 
 
@@ -125,7 +125,7 @@ def create_link_set(driver):
     return links
 
 def get_books_from_links(link_set, source, driver, expand_set=True):
-    for link in tqdm(link_set, desc=f'Scraping the {len(link_set)} books for {source}'):
+    for link in tqdm(link_set, desc=f'Scraping the {len(link_set)} links for {source}'):
         driver.get(link)
         select = Select(driver.find_element_by_id('search_sort'))
         select.select_by_value('5')
