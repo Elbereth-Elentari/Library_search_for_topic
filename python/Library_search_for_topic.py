@@ -19,7 +19,7 @@ from selenium.webdriver.support.ui import Select
 from selenium .webdriver import ChromeOptions
 
 from ipykernel import kernelapp as app
-from tqdm.auto import tqdm
+from tqdm import tqdm
 
 
 
