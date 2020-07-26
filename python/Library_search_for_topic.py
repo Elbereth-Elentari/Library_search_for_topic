@@ -163,7 +163,7 @@ def scrape_tags_and_authors(term):
     interesting_books = [{'title':book.title, 'author':book.author, 'publisher':book.publisher, 'year':book.year, 'pages':book.pages, 'WD_signature':book.WD_signature, 'storage':book.storage, 'source':book.source} for book in Book.interesting_books]
     reading_df = pd.DataFrame(columns=['source', 'title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
     reading_df = deduplicate_books(reading_df)
-    reading_df.to_csv(f"../data/results/{term.replace('+', '_')}_reading_list.tsv", index=False, sep='\t')
+    reading_df.to_csv(f"data/results/{term.replace('+', '_')}_reading_list.tsv", index=False, sep='\t')
     print(f'Scraped {len(reading_df)} books, without duplicates.')
     return reading_df
 
@@ -246,4 +246,4 @@ if __name__ == '__main__':
     tag['tokens'] = tag['tokens'].apply(lambda x: x+[term.replace('+', ' ')])
     cat_sim = calculate_similarity(preprocessed_cat, tag)
     reading_list = reading_list.append(cat_sim, ignore_index=True)
-    reading_list.to_csv(f"../data/results/{term.replace('+', '_')}_Bibliography", index=False, sep='\t')
+    reading_list.to_csv(f"data/results/{term.replace('+', '_')}_Bibliography", index=False, sep='\t')
