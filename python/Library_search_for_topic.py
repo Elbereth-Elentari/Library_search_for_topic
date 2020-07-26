@@ -247,4 +247,5 @@ if __name__ == '__main__':
                       
     cat_sim = calculate_similarity(preprocessed_cat, tag)
     reading_list = reading_list.append(cat_sim, ignore_index=True)
-    reading_list.to_csv(f"/content/Library_search_for_topic/data/results/{term.replace('+', '_')}_Bibliography", index=False, sep='\t')
+    reading_list.to_csv(f"{term.replace('+', '_')}_Bibliography.tsv", index=False, sep='\t')
+    print(f'Found {len(reading_list)} books.')
