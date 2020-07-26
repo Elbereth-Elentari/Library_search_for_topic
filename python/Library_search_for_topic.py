@@ -231,7 +231,7 @@ def calculate_similarity(preprocessed_df, tag_df):
     cat_sim.drop(cat_sim[cat_sim['similarity'] < 0.7].index, inplace=True)
     cat_sim.sort_values(by='similarity', inplace=True, ascending=False)
     cat_sim['source'] = 'similarity'
-    return cat_sim.drop(columns={'language', 'tokens'}, inplace=True)
+    return cat_sim.drop(columns={'language', 'tokens'})
 
 
 if __name__ == '__main__':
