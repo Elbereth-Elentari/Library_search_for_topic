@@ -238,12 +238,13 @@ if __name__ == '__main__':
     term, min_year, min_length, max_length = get_conditions()
     reading_list = scrape_tags_and_authors(term)
     cat = merge_tsvs()
-    for index, row in tag.iterrows():
-        cat.drop(cat[cat['title'] == row['title']].index, inplace=True)
     preprocessed_cat = preprocess(cat)
 
     tag = preprocess(reading_list[reading_list['source'] == 'tags'])
     tag['tokens'] = tag['tokens'].apply(lambda x: x+[term.replace('+', ' ')])
+    for index, row in tag.iterrows():
+        preprocessed_cat.drop(preprocessed_cat[preprocessed_cat['title'] == row['title']].index, inplace=True)
+                      
     cat_sim = calculate_similarity(preprocessed_cat, tag)
     reading_list = reading_list.append(cat_sim, ignore_index=True)
     reading_list.to_csv(f"/content/Library_search_for_topic/data/results/{term.replace('+', '_')}_Bibliography", index=False, sep='\t')
