@@ -163,8 +163,7 @@ def scrape_tags_and_authors(term):
     interesting_books = [{'title':book.title, 'author':book.author, 'publisher':book.publisher, 'year':book.year, 'pages':book.pages, 'WD_signature':book.WD_signature, 'storage':book.storage, 'source':book.source} for book in Book.interesting_books]
     reading_df = pd.DataFrame(columns=['source', 'title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
     reading_df = deduplicate_books(reading_df)
-    repo = 'Library_search_for_topic/'
-    reading_df.to_csv(repo + f'data/results/{term}_reading_list.tsv', index=False, sep='\t')
+    reading_df.to_csv(f'../data/results/{term}_reading_list.tsv', index=False, sep='\t')
     print(f'Scraped {len(reading_df)} books, without duplicates.')
     return reading_df
 
@@ -173,7 +172,7 @@ def merge_tsvs():
     cat = pd.DataFrame()
     for file in tqdm(os.listdir(repo + 'data/scraped/'), desc='Creating the full catalogue'):
         if file.endswith('.tsv'):
-            c = pd.read_csv(repo + 'data/scraped/' + file, sep='\t')
+            c = pd.read_csv('../data/scraped/' + file, sep='\t')
             cat = cat.append(c, ignore_index=True)
     return cat
 
@@ -247,4 +246,4 @@ if __name__ == '__main__':
     tag['tokens'] = tag['tokens'].apply(lambda x: x+[term.replace('+', ' ')])
     cat_sim = calculate_similarity(preprocessed_cat, tag)
     reading_list = reading_list.append(cat_sim, ignore_index=True)
-    reading_list.to_csv(repo + f'data/results/{term}_Bibliography', index=False, sep='\t')
+    reading_list.to_csv(f'../data/results/{term}_Bibliography', index=False, sep='\t')
