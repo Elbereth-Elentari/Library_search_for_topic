@@ -170,9 +170,9 @@ def scrape_tags_and_authors(term):
 
 def merge_tsvs():
     cat = pd.DataFrame()
-    for file in tqdm(os.listdir(repo + 'data/scraped/'), desc='Creating the full catalogue'):
+    for file in tqdm(os.listdir('/content/Library_search_for_topic/data/scraped/'), desc='Creating the full catalogue'):
         if file.endswith('.tsv'):
-            c = pd.read_csv('../data/scraped/' + file, sep='\t')
+            c = pd.read_csv('/content/Library_search_for_topic/data/scraped/' + file, sep='\t')
             cat = cat.append(c, ignore_index=True)
     return cat
 
