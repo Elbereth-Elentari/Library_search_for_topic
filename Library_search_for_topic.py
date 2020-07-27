@@ -230,9 +230,9 @@ if __name__ == '__main__':
     tag = preprocess(tag)
     tag['tokens'] = tag['tokens'].apply(lambda x: x+[term.replace('+', ' ')])
     for index, row in tag.iterrows():
-        preprocessed_cat.drop(preprocessed_cat[preprocessed_cat['title'] == row['title']].index, inplace=True)
+        cat.drop(cat[cat['title'] == row['title']].index, inplace=True)
 
-    cat_sim = calculate_similarity(preprocessed_cat, tag)
+    cat_sim = calculate_similarity(tag)
     reading_list = reading_list.append(cat_sim, ignore_index=True)
     reading_list.to_csv(f"{term.replace('+', '_')}_Bibliography.tsv", index=False, sep='\t')
     print(f'Found {len(reading_list)} books.')
