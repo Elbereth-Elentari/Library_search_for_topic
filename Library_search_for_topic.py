@@ -232,7 +232,7 @@ if __name__ == '__main__':
     for index, row in tag.iterrows():
         cat.drop(cat[cat['title'] == row['title']].index, inplace=True)
 
-    cat_sim = calculate_similarity(tag)
+    cat_sim = calculate_similarity(cat, tag)
     reading_list = reading_list.append(cat_sim, ignore_index=True)
     reading_list.to_csv(f"{term.replace('+', '_')}_Bibliography.tsv", index=False, sep='\t')
     print(f'Found {len(reading_list)} books.')
