@@ -161,7 +161,7 @@ def scrape_tags_and_authors(term):
     print(f'After removing duplicates, we scraped {len_from_tags} books from tags and {len(Book.interesting_books)-len_from_tags} books from authors.')
 
     interesting_books = [{'title':book.title, 'author':book.author, 'publisher':book.publisher, 'year':book.year, 'pages':book.pages, 'WD_signature':book.WD_signature, 'storage':book.storage, 'source':book.source} for book in Book.interesting_books]
-    reading_df = pd.DataFrame(columns=['year', 'source', 'title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
+    reading_df = pd.DataFrame(columns=['year', 'source', 'title','author', 'WD_signature', 'storage', 'publisher', 'pages'], data=interesting_books)
     reading_df = deduplicate_books(reading_df)
     reading_df.to_csv(f"/content/Library_search_for_topic/data/results/{term.replace('+', '_')}_reading_list.tsv", index=False, sep='\t')
     print(f'Scraped {len(reading_df)} books, without duplicates.')
