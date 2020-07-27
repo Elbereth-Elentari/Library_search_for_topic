@@ -94,6 +94,15 @@ def get_books(driver):
     return True
 
 
+def merge_tsvs():
+    cat = pd.DataFrame()
+    for file in tqdm(os.listdir('/content/Library_search_for_topic/data/scraped/'), desc='Creating the full catalogue'):
+        if file.endswith('.tsv'):
+            c = pd.read_csv('/content/Library_search_for_topic/data/scraped/' + file, sep='\t')
+            cat = cat.append(c, ignore_index=True)
+    return cat
+
+
 if __name__ == '__main__':
     min_length = 100
     max_length = 700

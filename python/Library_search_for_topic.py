@@ -168,14 +168,6 @@ def scrape_tags_and_authors(term):
     return reading_df
 
 
-def merge_tsvs():
-    cat = pd.DataFrame()
-    for file in tqdm(os.listdir('/content/Library_search_for_topic/data/scraped/'), desc='Creating the full catalogue'):
-        if file.endswith('.tsv'):
-            c = pd.read_csv('/content/Library_search_for_topic/data/scraped/' + file, sep='\t')
-            cat = cat.append(c, ignore_index=True)
-    return cat
-
 def detect_language(df):
     language = []
     for doc in tqdm(nlp.pipe(df['title'].values, batch_size=1000), desc='Detecting language', total=len(df)):
@@ -189,8 +181,6 @@ def detect_language(df):
 
 
 def preprocess(input_df):
-    input_df = deduplicate_books(input_df)
-    input_df = detect_language(input_df)
     preprocessed_df = pd.DataFrame()
 
     for lang in ['pl', 'en']:
@@ -228,6 +218,7 @@ def calculate_similarity(preprocessed_df, tag_df):
             else: preprocessed.append('similarity_fail')
         df['similarity'] = similarity
         cat_sim = cat_sim.append(df)
+    print(cat_sim.head())
     cat_sim.drop(cat_sim[cat_sim['similarity'] < 0.7].index, inplace=True)
     cat_sim.sort_values(by='similarity', inplace=True, ascending=False)
     cat_sim['source'] = 'similarity'
@@ -238,12 +229,12 @@ def calculate_similarity(preprocessed_df, tag_df):
 if __name__ == '__main__':
     term, min_year, min_length, max_length = get_conditions()
     reading_list = scrape_tags_and_authors(term)
-    cat = merge_tsvs()
+    cat = pd.read_json('/content/Library_search_for_topic/data/scraped/Library_catalogue.json')
     preprocessed_cat = preprocess(cat)
-    preprocessed_cat.to_csv('/content/Library_search_for_topic/data/scraped/Library_catalogue.tsv', sep='\t', index=False)
+    preprocessed_cat.to_json('/content/Library_search_for_topic/data/scraped/Library_catalogue2.json')
 
-
-    tag = preprocess(reading_list[reading_list['source'] == 'tags'])
+    tag = detect_language(reading_list[reading_list['source'] == 'tags'])
+    tag = preprocess(tag)
     tag['tokens'] = tag['tokens'].apply(lambda x: x+[term.replace('+', ' ')])
     for index, row in tag.iterrows():
         preprocessed_cat.drop(preprocessed_cat[preprocessed_cat['title'] == row['title']].index, inplace=True)
