@@ -125,7 +125,7 @@ def create_link_set(driver):
     return links
 
 def get_books_from_links(link_set, source, driver, expand_set=True):
-    for link in tqdm(link_set, desc=f'Scraping the {len(link_set)} links for {source}'):
+    for link in tqdm(link_set, desc=f'Scraping {len(link_set)} links for {source}'):
         driver.get(link)
         select = Select(driver.find_element_by_id('search_sort'))
         select.select_by_value('5')
@@ -158,10 +158,10 @@ def scrape_tags_and_authors(term):
     len_from_tags = len(Book.interesting_books)
     get_books_from_links(Book.authors_to_scrape, 'authors', driver, False)
     driver.close()
-    print(f'Scraped {len_from_tags} books from tags and {len(Book.interesting_books)-len_from_tags} books from authors.')
+    print(f'After removing duplicates, we scraped {len_from_tags} books from tags and {len(Book.interesting_books)-len_from_tags} books from authors.')
 
     interesting_books = [{'title':book.title, 'author':book.author, 'publisher':book.publisher, 'year':book.year, 'pages':book.pages, 'WD_signature':book.WD_signature, 'storage':book.storage, 'source':book.source} for book in Book.interesting_books]
-    reading_df = pd.DataFrame(columns=['source', 'title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
+    reading_df = pd.DataFrame(columns=['year', 'source', 'title','author', 'WD_signature', 'storage', 'publisher', 'year', 'pages'], data=interesting_books)
     reading_df = deduplicate_books(reading_df)
     reading_df.to_csv(f"/content/Library_search_for_topic/data/results/{term.replace('+', '_')}_reading_list.tsv", index=False, sep='\t')
     print(f'Scraped {len(reading_df)} books, without duplicates.')
@@ -185,7 +185,6 @@ def detect_language(df):
         else: language.append('')
 
     df['language'] = language
-    df.to_csv('/content/Library_search_for_topic/data/scraped/Library_catalogue.tsv', sep='\t', index=False)
     return df
 
 
@@ -232,7 +231,8 @@ def calculate_similarity(preprocessed_df, tag_df):
     cat_sim.drop(cat_sim[cat_sim['similarity'] < 0.7].index, inplace=True)
     cat_sim.sort_values(by='similarity', inplace=True, ascending=False)
     cat_sim['source'] = 'similarity'
-    return cat_sim.drop(columns={'language', 'tokens'})
+    cat_sim.drop(columns={'language', 'tokens'}, inplace=True)
+    return cat_sim
 
 
 if __name__ == '__main__':
@@ -240,6 +240,8 @@ if __name__ == '__main__':
     reading_list = scrape_tags_and_authors(term)
     cat = merge_tsvs()
     preprocessed_cat = preprocess(cat)
+    preprocessed_cat.to_csv('/content/Library_search_for_topic/data/scraped/Library_catalogue.tsv', sep='\t', index=False)
+
 
     tag = preprocess(reading_list[reading_list['source'] == 'tags'])
     tag['tokens'] = tag['tokens'].apply(lambda x: x+[term.replace('+', ' ')])
