@@ -185,6 +185,7 @@ def detect_language(df):
         else: language.append('')
 
     df['language'] = language
+    df.to_csv('/content/Library_search_for_topic/data/scraped/Library_catalogue.tsv', sep='\t', index=False)
     return df
 
 
@@ -244,7 +245,7 @@ if __name__ == '__main__':
     tag['tokens'] = tag['tokens'].apply(lambda x: x+[term.replace('+', ' ')])
     for index, row in tag.iterrows():
         preprocessed_cat.drop(preprocessed_cat[preprocessed_cat['title'] == row['title']].index, inplace=True)
-                      
+
     cat_sim = calculate_similarity(preprocessed_cat, tag)
     reading_list = reading_list.append(cat_sim, ignore_index=True)
     reading_list.to_csv(f"{term.replace('+', '_')}_Bibliography.tsv", index=False, sep='\t')
