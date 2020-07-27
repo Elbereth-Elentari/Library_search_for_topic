@@ -5,7 +5,6 @@ import pandas as pd
 
 import spacy
 from spacy_langdetect import LanguageDetector
-import spacy.cli
 import en_core_web_lg
 nlp = en_core_web_lg.load()
 nlp.add_pipe(LanguageDetector(), name='language_detector', last=True)
@@ -161,7 +160,6 @@ def scrape_tags_and_authors(term):
     interesting_books = [{'title':book.title, 'author':book.author, 'publisher':book.publisher, 'year':book.year, 'pages':book.pages, 'WD_signature':book.WD_signature, 'storage':book.storage, 'source':book.source} for book in Book.interesting_books]
     reading_df = pd.DataFrame(columns=['year', 'source', 'title','author', 'WD_signature', 'storage', 'publisher', 'pages'], data=interesting_books)
     reading_df = deduplicate_books(reading_df)
-    reading_df.to_csv(f"/content/Library_search_for_topic/data/results/{term.replace('+', '_')}_reading_list.tsv", index=False, sep='\t')
     print(f'Removing duplicates left {len(reading_df)} books.')
     return reading_df
 
@@ -226,7 +224,7 @@ def calculate_similarity(preprocessed_df, tag_df):
 if __name__ == '__main__':
     term, min_year, min_length, max_length = get_conditions()
     reading_list = scrape_tags_and_authors(term)
-    cat = pd.read_json('/content/Library_search_for_topic/data/scraped/Library_catalogue.json')
+    cat = pd.read_json('/content/Library_search_for_topic/Library_catalogue.json')
 
     tag = detect_language(reading_list[reading_list['source'] == 'tags'])
     tag = preprocess(tag)
