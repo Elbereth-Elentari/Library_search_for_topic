@@ -203,7 +203,7 @@ def calculate_similarity(preprocessed_df, tag_df):
     cat_sim = pd.DataFrame()
     for lang in ['pl', 'en']:
         df = preprocessed_df[preprocessed_df['language'] == lang]
-        semantics = ' '.join(tag[tag['language'] == lang].tokens.str.join(' '))
+        semantics = ' '.join(tag_df[tag_df['language'] == lang].tokens.str.join(' '))
         if lang == 'en': model = nlp
         elif lang == 'pl': model = nlp_pl
         semantics = model(semantics)
