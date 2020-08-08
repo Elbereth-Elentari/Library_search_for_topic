@@ -124,8 +124,10 @@ def create_link_set(driver):
 def get_books_from_links(link_set, source, driver, expand_set=True):
     for link in tqdm(link_set, desc=f'Scraping {len(link_set)} links for {source}'):
         driver.get(link)
-        select = Select(driver.find_element_by_id('search_sort'))
-        select.select_by_value('5')
+        try:
+            select = Select(driver.find_element_by_id('search_sort'))
+            select.select_by_value('5')
+        except: pass
         too_old = get_books(driver, source, expand_set)
         while too_old == 'not too old':
             if next_or_break(driver) == 'no next': break
